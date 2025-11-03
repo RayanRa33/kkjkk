@@ -1,0 +1,261 @@
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Le Mystère d'Arterium</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --accent: #cba26b;
+      --glow: rgba(168,132,255,0.3);
+      --text: #efeae6;
+      --muted: rgba(238,234,230,0.7);
+      --bg-dark: #070707;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      background: #000;
+    }
+
+    .wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .bg {
+      position: absolute; inset: 0;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: contrast(0.75) saturate(0.9);
+      opacity: 0.95;
+      z-index: 0;
+      transform: scale(1.02);
+    }
+
+    .overlay {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.25), rgba(0,0,0,0.82));
+      z-index: 1;
+    }
+
+    .content {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 920px;
+      padding: 40px 28px;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      gap: 18px;
+    }
+
+    h1 {
+      font-family: "Cinzel", serif;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent);
+      font-size: 36px;
+      margin: 6px 0 2px;
+      text-shadow: 0 6px 26px rgba(0,0,0,0.6);
+    }
+
+    #teaser {
+      color: var(--muted);
+      font-size: 18px;
+      min-height: 26px;
+      transition: opacity .8s;
+      font-style: italic;
+    }
+
+    .count {
+      font-family: "Cinzel", serif;
+      font-size: 28px;
+      color: #d9c3ff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6), 0 0 32px var(--glow);
+      letter-spacing: 1px;
+    }
+
+    .controls {
+      display: flex; flex-wrap: wrap;
+      gap: 12px; margin-top: 10px;
+      align-items: center; justify-content: center;
+    }
+
+    .btn {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      backdrop-filter: blur(2px);
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px var(--glow), 0 0 12px var(--accent);
+    }
+
+    #clueArea {
+      margin-top: 18px;
+      width: 100%;
+      max-width: 760px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.03);
+      padding: 16px 18px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 15px;
+      min-height: 48px;
+    }
+
+    #codeInput {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #cba26b;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      outline: none;
+      width: 180px;
+      text-align: center;
+    }
+
+    .footer {
+      margin-top: 22px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    @media (max-width:600px) {
+      h1 { font-size: 26px; }
+      .count { font-size: 18px; }
+      .content { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="bg" aria-hidden="true"></div>
+    <div class="overlay" aria-hidden="true"></div>
+
+    <div class="content">
+      <h1>Le Mystère d'Arterium</h1>
+      <div id="teaser">Quelque chose se prépare...</div>
+      <div id="countdown" class="count" aria-live="polite">Calcul du temps...</div>
+
+      <div class="controls">
+        <button class="btn" id="musicBtn">🔊 Musique</button>
+        <button class="btn" id="revealBtn">Afficher l'indice</button>
+        <button class="btn" id="formBtn">Ouvrir le formulaire</button>
+        <button class="btn" id="joinBtn">🖋️ Rejoindre le club</button>
+      </div>
+
+      <div id="clueArea" aria-hidden="true"></div>
+
+      <input type="text" id="codeInput" placeholder="Entrez le code ici" />
+
+      <div class="footer">Arterium — UM6SS • Restez curieux</div>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop crossorigin>
+    <source src="https://cdn.pixabay.com/download/audio/2023/01/05/audio_2b05d1a8de.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Countdown
+    const eventDate = new Date("Nov 10, 2025 09:00:00").getTime();
+    const cdEl = document.getElementById('countdown');
+    function updateCountdown(){
+      const now = Date.now();
+      const d = eventDate - now;
+      if(d <= 0){
+        cdEl.textContent = "L'événement est en cours ou a commencé.";
+      } else {
+        const days = Math.floor(d / (1000*60*60*24));
+        const hours = Math.floor((d % (1000*60*60*24)) / (1000*60*60));
+        const minutes = Math.floor((d % (1000*60*60)) / (1000*60));
+        const seconds = Math.floor((d % (1000*60)) / 1000);
+        cdEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
+      }
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // rotating teasers
+    const teasers = [
+      "Quelque chose se prépare...",
+      "Le mystère approche...",
+      "Arterium arrive...",
+      "Découvre la vérité cachée...",
+      "Tout commence bientôt..."
+    ];
+    const teaserEl = document.getElementById('teaser');
+    let idx = 0;
+    setInterval(() => {
+      idx = (idx+1) % teasers.length;
+      teaserEl.style.opacity = 0;
+      setTimeout(()=> {
+        teaserEl.textContent = teasers[idx];
+        teaserEl.style.opacity = 1;
+      }, 600);
+    }, 4000);
+
+    // music toggle
+    const music = document.getElementById('bgMusic');
+    const musicBtn = document.getElementById('musicBtn');
+    musicBtn.addEventListener('click', () => {
+      if(music.paused) {
+        music.play();
+        musicBtn.textContent = "🔈 Musique ON";
+      } else {
+        music.pause();
+        musicBtn.textContent = "🔊 Musique";
+      }
+    });
+
+    // afficher l'indice (display message)
+    const revealBtn = document.getElementById('revealBtn');
+    const clueArea = document.getElementById('clueArea');
+    revealBtn.addEventListener('click', () => {
+      clueArea.textContent = "Il n’y a pas d’indice pour le moment.";
+    });
+
+    // ouvrir le formulaire (check code)
+    const formBtn = document.getElementById('formBtn');
+    const codeInput = document.getElementById('codeInput');
+    const correctCode = "ART123"; // code à définir après les 3 indices
+    const googleFormURL = "https://forms.gle/yourGoogleFormLinkHere"; // lien du formulaire mystère
+
+    formBtn.addEventListener('click', () => {
+      if(codeInput.value === correctCode){
+        window.open(googleFormURL,'_blank');
+      } else {
+        alert("Code incorrect. Résolvez les 3 indices pour obtenir le code.");
+      }
+    });
+
+    // Rejoindre le club (direct form)
+    const joinBtn = document.getElementById('joinBtn');
+    joinBtn.addEventListener('click', () => {
+      window.open("https://docs.google.com/forms/d/19O7EDZt7lqhOFSo3YRcnPm7GlRhaGRrzXUbUDJpaHm4/viewform", "_blank");
+    });
+  </script>
+</body>
+</html>
